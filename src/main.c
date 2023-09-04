@@ -90,7 +90,7 @@ unsigned char get_buffer[8]; // 温度 光照 湿度 是否翻蛋 是否通风 是否加湿 是否加
 char *tar_buf = "";
 
 // 加湿
-sbit P2_0 = P1 ^ 0;
+sbit P1_0 = P1 ^ 0;
 // sbit  P2_0  = 0x90 ;
 U8 U8FLAG, k;
 U8 U8count, U8temp;
@@ -116,6 +116,26 @@ void Delay1000ms() //@11.0592MHz
     } while (--i);
 }
 
+void Delay10ms()  //@11.0592MHz
+{
+  unsigned char data i, j;
+
+  i = 108;
+  j = 145;
+  do {
+    while(--j)
+      ;
+  } while(--i);
+}
+
+void Delay_10us(void) {
+  unsigned char data i;
+  _nop_();
+  i = 25;
+  while(--i)
+    ;
+}
+
 void Delay3s()
 {
     Delay1000ms();
@@ -131,45 +151,38 @@ void Delay(unsigned int j)
             ;
     }
 }
-void Delay_10us(void)
-{
-    unsigned char i;
-    i--;
-    i--;
-    i--;
-    i--;
-    i--;
-    i--;
+// void Delay_10us(void)
+// {
+//     unsigned char i;
+//     i--;
+//     i--;
+//     i--;
+//     i--;
+//     i--;
+//     i--;
+// }
+
+unsigned char COM(void) {
+    unsigned char i,dat=0;
+
+  for(i = 0; i < 8; i++) {
+    while(P1_0)
+      ;
+    while(!P1_0)
+      ;
+    Delay_10us();
+    Delay_10us();
+    Delay_10us();
+    Delay_10us();
+    Delay_10us();
+    dat <<= 1;
+    if(P1_0) {
+      dat |= 1;  // 0
+    };
+  }  // rof
+  return dat;
 }
 
-void COM(void)
-{
-
-    unsigned char i;
-
-    for (i = 0; i < 8; i++) {
-
-        U8FLAG = 2;
-        while ((!P2_0) && U8FLAG++)
-            ;
-        Delay_10us();
-        Delay_10us();
-        Delay_10us();
-        U8temp = 0;
-        if (P2_0) U8temp = 1;
-        U8FLAG = 2;
-        while ((P2_0) && U8FLAG++)
-            ;
-        // 超时则跳出for循环
-        if (U8FLAG == 1) break;
-        // 判断数据位是0还是1
-
-        // 如果高电平高过预定0高电平值则数据位为 1
-
-        U8comdata <<= 1;
-        U8comdata |= U8temp; // 0
-    }                        // rof
-}
 
 //--------------------------------
 //-----湿度读取子程序 ------------
@@ -184,55 +197,31 @@ void COM(void)
 //---- Delay();, Delay_10us();,COM();
 //--------------------------------
 
-void RH(void)
-{
-    // 主机拉低18ms
-    P2_0 = 0;
-    Delay(180);
-    P2_0 = 1;
-    // 总线由上拉电阻拉高 主机延时20us
+void RH(void) {
+  // 主机拉低18ms
+  P1_0 = 0;
+  Delay10ms();
+  Delay10ms();
+  P1_0 = 1;
+  // 总线由上拉电阻拉高 主机延时20us
+  Delay_10us();
+  Delay_10us();
+  Delay_10us();
+  // 主机设为输入 判断从机响应信号
+  // P1_0 = 1;
+  // 判断从机是否有低电平响应信号 如不响应则跳出，响应则向下运行
+  if(!P1_0)  // T !
+  {
+    while(!P1_0)
+      ;
     Delay_10us();
     Delay_10us();
     Delay_10us();
     Delay_10us();
-    // 主机设为输入 判断从机响应信号
-    P2_0 = 1;
-    // 判断从机是否有低电平响应信号 如不响应则跳出，响应则向下运行
-    if (!P2_0) // T !
-    {
-        U8FLAG = 2;
-        // 判断从机是否发出 80us 的低电平响应信号是否结束
-        while ((!P2_0) && U8FLAG++)
-            ;
-        U8FLAG = 2;
-        // 判断从机是否发出 80us 的高电平，如发出则进入数据接收状态
-        while ((P2_0) && U8FLAG++)
-            ;
-        // 数据接收状态
-        COM();
-        U8RH_data_H_temp = U8comdata;
-        COM();
-        U8RH_data_L_temp = U8comdata;
-        COM();
-        U8T_data_H_temp = U8comdata;
-        COM();
-        U8T_data_L_temp = U8comdata;
-        COM();
-        U8checkdata_temp = U8comdata;
-        P2_0             = 1;
-        // 数据校验
-
-        U8temp = (U8T_data_H_temp + U8T_data_L_temp + U8RH_data_H_temp + U8RH_data_L_temp);
-        if (U8temp == U8checkdata_temp) {
-            U8RH_data_H = U8RH_data_H_temp;
-            U8RH_data_L = U8RH_data_L_temp;
-            U8T_data_H  = U8T_data_H_temp;
-            U8T_data_L  = U8T_data_L_temp;
-            U8checkdata = U8checkdata_temp;
-        } // fi
-    }     // fi
+    Delay_10us();
+    U8RH_data_H=COM();
+  }
 }
-
 void set_buffer()
 {
     // unsigned char buffer[12];     // 年 月 日 时 分 秒 温度 光照 湿度 设定温度 设定光照 设定湿度
