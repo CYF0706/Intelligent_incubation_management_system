@@ -151,6 +151,7 @@ void Delay(unsigned int j)
             ;
     }
 }
+
 // void Delay_10us(void)
 // {
 //     unsigned char i;
@@ -222,6 +223,7 @@ void RH(void) {
     U8RH_data_H=COM();
   }
 }
+
 void set_buffer()
 {
     // unsigned char buffer[12];     // 年 月 日 时 分 秒 温度 光照 湿度 设定温度 设定光照 设定湿度
