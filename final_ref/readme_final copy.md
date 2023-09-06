@@ -461,5 +461,12 @@ void set_buffer()
 3.  可以添加更多功能以及更换性能更好的单片机
 
 
-## 5. 拓展知识（孵蛋相关）
+## 5.拓展知识（孵蛋相关）
 >   https://zhuanlan.zhihu.com/p/114975190
+
+## 6.相关源码
+[py文件（主要为ui)](https://gitee.com/cyf-0706/tkinter_ui_incubation_py)
+
+[工程文件以及hex文件](https://gitee.com/cyf-0706/Intelligent_incubation_management_system)
+
+>   hex的相对路径为：build\Release\final_project.hex
